@@ -1,8 +1,8 @@
 @echo off
 cd /d "%~dp0"
-title GPU Video Watermark Inpainter
+title AI Video Watermark Remover
 echo ====================================================
-echo   Starting High-Performance GPU Watermark Inpainter
+echo   Starting AI Video Watermark Remover
 echo ====================================================
 echo.
 echo Initializing Python environment...

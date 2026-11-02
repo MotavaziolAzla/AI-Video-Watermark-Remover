@@ -327,8 +327,8 @@ def run_batch_ui_action(
 # -------------------------------------------------------------
 # Gradio UI Definition
 # -------------------------------------------------------------
-with gr.Blocks(title="GPU Video Watermark Inpainter") as demo:
-    gr.Markdown("# ⚡ GPU Video Watermark & Text Inpainter")
+with gr.Blocks(title="AI Video Watermark Remover") as demo:
+    gr.Markdown("# ⚡ AI Video Watermark Remover")
     system_badge_display = gr.HTML(get_system_badge_html(current_mask_preset))
     
     with gr.Row():

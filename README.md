@@ -1,5 +1,5 @@
 [Fully Vibe Coded using Antigravity Gemini 3.8 Flash]
-# ⚡ ClearFlow-AI: High-Performance GPU Video Watermark Inpainter
+# ⚡ AI-Video-Watermark-Remover
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![PyTorch CUDA](https://img.shields.io/badge/PyTorch-2.6%2Bcu124-EE4C2C.svg)](https://pytorch.org/)
@@ -37,7 +37,7 @@ A state-of-the-art, GPU-accelerated video inpainting suite engineered to seamles
 ## 📁 Repository Layout
 
 ```text
-ClearFlow-AI/
+AI-Video-Watermark-Remover/
 ├── app.py                      # Interactive Gradio Web UI
 ├── pipeline.py                 # Core video processing pipeline (Stabilizer, Scene Cuts, NVENC)
 ├── engine.py                   # Unified inpainter factory & wrappers
@@ -69,8 +69,8 @@ ClearFlow-AI/
 ### Option A: 1-Click Setup (Windows)
 1. Clone this repository:
    ```bash
-   git clone https://github.com/<your-username>/ClearFlow-AI.git
-   cd ClearFlow-AI
+   git clone https://github.com/<your-username>/AI-Video-Watermark-Remover.git
+   cd AI-Video-Watermark-Remover
    ```
 2. Double-click:
    ```bat

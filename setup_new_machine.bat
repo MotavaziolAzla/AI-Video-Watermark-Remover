@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
-title GPU Video Inpainter - New Machine Automatic Setup
+title AI Video Watermark Remover - New Machine Setup
 
 echo ========================================================
-echo   GPU Video Watermark Inpainter - 1-Click Setup
+echo   AI Video Watermark Remover - 1-Click Setup
 echo ========================================================
 echo.
 
