@@ -1,0 +1,56 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.cache/
+
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Large Distribution Packages and Archives
+dist/
+Watermark_Remover_Package/
+*.rar
+*.zip
+*.7z
+*.tar.gz
+
+# AI Model Weights & Checkpoints (>100MB, fetched via download_models.py)
+checkpoints/
+*.pth
+*.pt
+*.onnx
+*.bin
+models/ProPainter/weights/*.pth
+models/E2FGVI/release_model/*.pth
+
+# Heavy upstream media, demos & datasets
+models/ProPainter/assets/
+models/ProPainter/inputs/
+models/ProPainter/web-demos/
+models/E2FGVI/figs/
+models/E2FGVI/datasets/
+models/E2FGVI/examples/
+
+# Video files (Inputs & Outputs)
+input_videos/*
+!input_videos/.gitkeep
+output_videos/*
+!output_videos/.gitkeep
+temp_test_renders/
+experiments/
+
+# Temporary and Inspection files
+temp_inspect/
+*.log
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
