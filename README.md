@@ -1,3 +1,4 @@
+[Fully Vibe Coded using Antigravity Gemini 3.8 Flash]
 # ⚡ ClearFlow-AI: High-Performance GPU Video Watermark Inpainter
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
