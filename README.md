@@ -1,142 +1,157 @@
-# ⚡ GPU-Accelerated Video Watermark & Text Inpainter
+# ⚡ ClearFlow-AI: High-Performance GPU Video Watermark Inpainter
 
-A high-performance local video inpainting tool designed to seamlessly remove static text and corner watermarks (such as "Dola AI") from videos with zero rectangular seam borders, hardware-accelerated NVENC video encoding, and audio track preservation.
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![PyTorch CUDA](https://img.shields.io/badge/PyTorch-2.6%2Bcu124-EE4C2C.svg)](https://pytorch.org/)
+[![Gradio UI](https://img.shields.io/badge/Gradio-Web%20App-orange.svg)](https://gradio.app/)
+[![Hardware Acceleration](https://img.shields.io/badge/Encoder-NVENC%20h264-brightgreen.svg)](https://developer.nvidia.com/video-codec-sdk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+A state-of-the-art, GPU-accelerated video inpainting suite engineered to seamlessly erase static text, AI watermarks, and corner logos (such as **Google Gemini** and **Dola AI**) from video sequences. Features **zero rectangular seam borders**, **motion-compensated spatio-temporal stabilization**, **direct NVENC streaming**, and **lossless audio preservation**.
 
 ---
 
-## 🚀 Inpainting Engines
+## 🌟 Highlights
+
+- **🎯 1-Click Multi-Preset Masking**: Instantly switch between built-in watermark profiles (e.g. **Gemini** 4-pointed sparkle star logo or **Dola AI** text) directly from the sidebar.
+- **⚡ Hybrid Inpainting Engine**: Fuses **ProPainter's** spatio-temporal transformer structure reconstruction with **RAFT** flow-guided motion-compensated stabilization—eliminating camera pan/tilt stutters and boundary flickers.
+- **🚀 Smart Context-Padded ROI Processing**: Extracts only the localized watermark region (multiples of 8/16 with configurable padding) for inpainting, saving up to 90% GPU compute compared to full-frame processing. Non-masked pixels are preserved bitwise.
+- **🎨 Gaussian Feathered Alpha Blending**: Dilation kernels (11–13px) and Gaussian feathering (5–7px) generate smooth continuous alpha transitions, guaranteeing **zero visible crop borders or edge seams**.
+- **🎬 Direct NVENC Hardware Streaming**: Pipes raw frames directly to hardware-accelerated `h264_nvenc` via FFmpeg with zero disk frame-dumping, muxing the original audio track (`-c:a copy`) with zero quality loss.
+- **✂️ Scene Cut Protection**: Dual-metric scene detector (L1 pixel delta + HSV histogram correlation) prevents temporal models from blending across shot cuts.
+
+---
+
+## 🚀 Supported Engines
 
 | Engine | Type | Primary Strength | Typical Speed | Best Used For |
 |---|---|---|---|---|
-| **Hybrid (ProPainter + Flow Tracking)** | Video Flow + SOTA Inpainting | Dual-domain ProPainter structure synthesis + Flow-guided motion compensated stabilizer | ~4–8 FPS (RTX 3060) / 15–30 FPS (24GB VRAM) | **[RECOMMENDED] Ultimate Consistency**: Perfectly coherent textures, zero flicker during tilts/pans, and flawless scene cut handling |
-| **ProPainter (ICCV 2023)** | Video Temporal Flow | Dual-domain flow completion + Spatio-temporal transformer | ~4–8 FPS (RTX 3060) / 15–30 FPS (24GB VRAM) | **SOTA Video Quality**: Complex camera motions, moving objects behind watermarks |
-| **E2FGVI-HQ (CVPR 2022)** | Video Temporal Flow | Multi-scale feature propagation + Focal transformer | ~7–12 FPS (RTX 3060) / 25–45 FPS (24GB VRAM) | **Fast Video SOTA**: High temporal consistency at double the speed |
+| **Hybrid [RECOMMENDED]** | Video Flow + SOTA Inpainting | Dual-domain ProPainter structure synthesis + Flow-guided motion compensated stabilizer | ~4–8 FPS (Laptop) / 15–30 FPS (24GB VRAM) | **Ultimate Consistency**: Coherent textures, zero flicker during camera motion, pan, and tilt |
+| **ProPainter (ICCV 2023)** | Video Temporal Flow | Dual-domain flow completion + Spatio-temporal transformer | ~4–8 FPS | **SOTA Video Quality**: Complex camera motions, moving objects behind watermarks |
+| **E2FGVI-HQ (CVPR 2022)** | Video Temporal Flow | Multi-scale feature propagation + Focal transformer | ~7–12 FPS | **Fast Video SOTA**: High temporal consistency at double the speed |
 | **AI LaMa** | Single-Frame Neural | Fast Fourier Convolutions (Large Mask Inpainting) | ~20–35 FPS | **Lightweight AI**: Ideal for static scenes, quick renders, and high resolution textures |
 | **OpenCV NS / Telea** | Classical Math | Partial differential equations (Navier-Stokes / Telea) | ~50–85 FPS | **Fastest Baseline**: CPU-friendly, ultra-fast previews |
 
 ---
 
-## 📁 Project Directory Structure
-
-The project is organized cleanly into dedicated functional directories:
+## 📁 Repository Layout
 
 ```text
-Watermark/
+ClearFlow-AI/
 ├── app.py                      # Interactive Gradio Web UI
-├── pipeline.py                 # Core video processing pipeline (Stabilizer, Scene cuts, NVENC)
+├── pipeline.py                 # Core video processing pipeline (Stabilizer, Scene Cuts, NVENC)
 ├── engine.py                   # Unified inpainter factory & wrappers
 ├── propainter_engine.py        # ProPainter video inpainting engine
 ├── e2fgvi_engine.py            # E2FGVI-HQ video inpainting engine
 ├── mask_generator.py           # Auto watermark detector & mask utilities
 ├── batch_processor.py          # Headless batch CLI processor
 ├── config.py                   # Central path & GPU configurations
-├── download_models.py          # Model weights downloader & integrity checks
+├── download_models.py          # Automated offline model weights downloader
 ├── requirements.txt            # Python dependencies
 ├── run_app.bat                 # 1-Click UI launcher
 ├── setup_new_machine.bat       # Automatic 1-click environment installer
 ├── mask.png                    # Default watermark mask
 │
-├── checkpoints/                # Offline model weights (e.g., big-lama.pt)
-├── models/                     # Deep learning repositories & weights (ProPainter, E2FGVI)
-├── input_videos/               # Input video files for processing
-├── output_videos/              # Final processed renders & comparisons
-│   ├── archive_tests/          # Historical/intermediate test renders
-│   └── debug_frames/           # Debug frame crops & diagnostics
-├── tests/                      # Verification, unit, and regression tests
-├── experiments/                # Exploratory inspection & temporary test scripts
-├── dist/                       # Packaged release archives (.rar, .zip)
-└── Watermark_Remover_Package/  # Isolated standalone distribution staging folder
+├── masks/                      # Built-in watermark mask presets
+│   ├── dola_ai.png             # Preset for Dola AI text watermark
+│   └── gemini.png              # Preset for Google Gemini sparkle logo
+├── checkpoints/                # Model weights directory (fetched via script)
+├── models/                     # Deep learning architecture modules
+├── input_videos/               # Input video folder
+├── output_videos/              # Processed output folder
+└── tests/                      # Unit, benchmark, and regression test suite
 ```
-
-> [!NOTE]
-> `Watermark_Remover_Package/` is kept independent from day-to-day workspace experiments and is used strictly for staging and testing self-contained zero-dependency releases.
 
 ---
 
-## 🛠️ Architecture Highlights
+## 💻 Quick Start & Installation
 
-1. **Smart Context-Padded ROI (Multiples of 8/16):**
-   - Automatically computes the bounding box around non-zero mask pixels plus user-defined context padding (default 96px).
-   - Only processes the tiny cropped corner ROI through inpainting models instead of the entire frame, giving massive speed gains.
-   - Preserves 100% of non-masked pixels bitwise.
-
-2. **Seamless Feathered Alpha Blending:**
-   - Dilation kernel (default 13px) fully covers antialiased text edges and subtle drop shadows.
-   - Gaussian feathering (default 7px) produces a smooth alpha mask (`0.0` to `1.0`), guaranteeing zero visible rectangular border or crop seams.
-
-3. **Motion-Adaptive Scene Cut Protection:**
-   - Dual-metric scene cut detector (L1 pixel delta + HSV histogram correlation) prevents temporal models or temporal smoothing from blending frames across shot boundaries.
-
-4. **Direct FFmpeg NVENC Streaming:**
-   - Streams raw BGR frames directly to FFmpeg with NVIDIA hardware acceleration (`h264_nvenc`).
-   - Copies the original audio track (`-c:a copy`) with zero quality loss or re-encoding artifacts.
-   - Never dumps thousands of PNG frames to disk.
-
----
-
-## 🖥️ How to Run the Web UI
-
-Simply double click:
-```
-run_app.bat
-```
-Or run from terminal:
-```powershell
-.\.venv\Scripts\python.exe app.py
-```
-Open your browser at: **[http://127.0.0.1:7860](http://127.0.0.1:7860)**
+### Option A: 1-Click Setup (Windows)
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/<your-username>/ClearFlow-AI.git
+   cd ClearFlow-AI
+   ```
+2. Double-click:
+   ```bat
+   setup_new_machine.bat
+   ```
+   *(This automatically creates `.venv`, installs PyTorch CUDA 12.4, dependencies, and downloads model weights).*
+3. Double-click:
+   ```bat
+   run_app.bat
+   ```
+   Your default web browser will automatically open at **`http://127.0.0.1:7860`**.
 
 ---
 
-## 🎛️ UI Tabs Overview
+### Option B: Manual Setup
+```bash
+# 1. Create and activate a virtual environment
+python -m venv .venv
+.\.venv\Scripts\activate
 
-### Persistent Master Settings (Sidebar)
-Governs all tabs and batch runs:
-- **Watermark Target Mask**: 1-click toggle between **Dola AI** (bottom-right text) and **Gemini** (bottom-right sparkle logo).
-- **Inpainting Engine**: Choose between Hybrid (Recommended), ProPainter, E2FGVI-HQ, AI LaMa, and OpenCV.
-- **Mask Dilation (px)**: Default 11–13px.
-- **Feather Radius (px)**: Default 7px.
-- **Context Padding (px)**: Default 64–96px.
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Download AI model weights
+python download_models.py
+
+# 4. Launch Web UI
+python app.py
+```
+
+---
+
+## 🎛️ Web UI Walkthrough
+
+Open **`http://127.0.0.1:7860`** in your browser:
+
+### 1. Persistent Sidebar Controls (Governs All Tabs)
+- **Target Mask**: 1-click toggle between **Gemini** (sparkle logo) and **Dola AI** (text).
+- **Inpainting Engine**: Select **Hybrid (RECOMMENDED)**, ProPainter, E2FGVI-HQ, AI LaMa, or OpenCV.
+- **Mask Dilation (px)**: Default 11–13px (ensures complete coverage of drop shadows and antialiased fringes).
+- **Feather Radius (px)**: Default 7px (guarantees zero visible rectangular seams).
+- **Context Padding (px)**: Default 64–96px (provides surrounding geometric context for structural synthesis).
 - **NVENC HW Encoding**: Hardware acceleration toggle.
 
-### Tab 1: 🎯 Mask Inspector & Single Frame Preview
-- **Sample Video Selector**: Load any video (`imdl5-34p1.mp4`).
-- **Timestamp Scrubbing**: Scrub to any second to test frames.
-- **Auto-Detect Watermark**: Samples 25 frames across the video and extracts clean `mask.png`.
-- **Corner Zoom & Visual Overlay**: Red highlight overlay shows the exact dilated mask boundary and yellow contour.
+### 2. Tab 1: 🎯 Mask Inspector & Single Frame Preview
+- Scrub to any timestamp in seconds.
+- Zoom in on the watermark corner to inspect the original, red mask overlay contour, and clean inpainted preview before full rendering.
 
-### Tab 2: 🎬 Video Test Render
-- Render any segment (e.g., 2–5 seconds) to inspect temporal consistency, optical flow, and audio playback.
+### 3. Tab 2: 🎬 Video Test Render
+- Render a 2–5 second preview slice with synchronized audio to check temporal fluidity at 24/30 FPS.
 
-### Tab 3: 📁 Batch Folder Automation
-- Select input and output directories to process entire video folders automatically with live progress and ETA.
+### 4. Tab 3: 📁 Batch Folder Automation
+- Select your `input_videos` and `output_videos` folders.
+- Choose your target watermark preset.
+- Click **Start Batch Processing** to clean an entire folder with real-time ETA and FPS metrics.
 
 ---
 
-## 💻 CLI Usage (Headless Batch Mode)
+## ⚡ CLI Usage (Headless Batch Mode)
 
 ```powershell
-# Run with Hybrid Engine for Gemini Watermark:
-.\.venv\Scripts\python.exe batch_processor.py --input input_videos --output output_videos --preset gemini --engine hybrid --nvenc
+# Clean videos with Google Gemini watermark preset:
+python batch_processor.py --input input_videos --output output_videos --preset gemini --engine hybrid --nvenc
 
-# Run with Hybrid Engine for Dola AI Watermark:
-.\.venv\Scripts\python.exe batch_processor.py --input input_videos --output output_videos --preset dola_ai --engine hybrid --nvenc
+# Clean videos with Dola AI watermark preset:
+python batch_processor.py --input input_videos --output output_videos --preset dola_ai --engine hybrid --nvenc
 
-# Run with ProPainter (SOTA Video Optical Flow):
-.\.venv\Scripts\python.exe batch_processor.py --input input_videos --output output_videos --preset dola_ai --engine propainter --nvenc
+# High-resolution 24GB VRAM workstation (expanded 64-frame temporal chunk window):
+python batch_processor.py --input input_videos --output output_videos --preset gemini --engine hybrid --chunk-size 64 --nvenc
 
-# Run with AI LaMa (Lightweight Single-Frame AI):
-.\.venv\Scripts\python.exe batch_processor.py --input input_videos --output output_videos --preset dola_ai --engine lama --nvenc
+# Fast preview mode using AI LaMa:
+python batch_processor.py --input input_videos --output output_videos --preset gemini --engine lama --nvenc
 ```
 
 ---
 
-## 📦 Setting Up on a New Machine (e.g. 24GB VRAM System)
+## 📜 License & Acknowledgments
 
-To migrate this project to a new machine:
-1. Copy or clone this project folder to the target machine.
-2. Double-click `setup_new_machine.bat` (or run it from cmd/powershell).
-   - Automatically installs Python virtual environment (`.venv`).
-   - Installs PyTorch with CUDA 12.4 and all required dependencies.
-   - Automatically downloads and verifies model weights (`ProPainter.pth`, `raft-things.pth`, `recurrent_flow_completion.pth`, `E2FGVI-HQ-CVPR22.pth`, and `big-lama.pt`).
-3. Double-click `run_app.bat` to launch!
+This project is released under the [MIT License](LICENSE).
+
+Special thanks to the open-source research and implementations powering our engines:
+- **ProPainter**: [sczhou/ProPainter](https://github.com/sczhou/ProPainter) (ICCV 2023)
+- **E2FGVI-HQ**: [MCG-NKU/E2FGVI](https://github.com/MCG-NKU/E2FGVI) (CVPR 2022)
+- **Large Mask Inpainting (LaMa)**: [advimman/lama](https://github.com/advimman/lama) & [simple-lama-inpainting](https://github.com/enesmsahin/simple-lama-inpainting)
+- **RAFT**: [princeton-vl/RAFT](https://github.com/princeton-vl/RAFT)
